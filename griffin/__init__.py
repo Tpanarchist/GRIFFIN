@@ -1,9 +1,3 @@
-"""
-G.R.I.F.F.I.N. package root.
-
-Keep this minimal so tests can import the package.
-"""
+from .core.version import __version__  # re-export
 
 __all__ = ["__version__"]
-
-__version__ = "0.0.0"

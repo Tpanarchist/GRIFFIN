@@ -1,17 +1,41 @@
-"""
-Small, pure atom types used across the project.
-Keep implementations minimal for the initial scaffold.
-"""
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import NewType
+from uuid import UUID, uuid4
 
-ID = NewType("ID", str)
+# --- Typed IDs -------------------------------------------------------------
 
+CharacterId = NewType("CharacterId", int)
+CorporationId = NewType("CorporationId", int)
+AllianceId = NewType("AllianceId", int)
+SystemId = NewType("SystemId", int)
+StructureId = NewType("StructureId", int)
+
+# --- Time ------------------------------------------------------------------
 
 @dataclass(frozen=True)
-class Quantity:
-    value: float
-    unit: str = "unit"
+class Timestamp:
+    """UTC timestamp wrapper with a few helpers."""
 
-    def __repr__(self) -> str:
-        return f"{self.value} {self.unit}"
+    value: datetime
+
+    @classmethod
+    def now(cls) -> "Timestamp":
+        return cls(datetime.now(timezone.utc))
+
+    def isoformat(self) -> str:
+        return self.value.isoformat()
+
+    def __str__(self) -> str:  # nice for logging / repr
+        return self.isoformat()
+
+# --- Message IDs -----------------------------------------------------------
+
+@dataclass(frozen=True)
+class MessageId:
+    value: UUID = field(default_factory=uuid4)
+
+    def __str__(self) -> str:
+        return str(self.value)
