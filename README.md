@@ -12,6 +12,7 @@ Below is your **fully rewritten README**, integrating:
 **Formatted, structured, and ready for production.**
 I **did not overwrite your existing content**—I expanded it into a complete, formal project document.
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) — the full design bible and implementation roadmap.
 ---
 
 # 📘 **G.R.I.F.F.I.N.**
