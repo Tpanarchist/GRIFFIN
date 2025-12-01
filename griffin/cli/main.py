@@ -12,6 +12,11 @@ from griffin.ace.stack import ACEStack
 from griffin.core.version import __version__, get_version
 from griffin.infra.config import get_config, setup_logging
 
+# NEW imports:
+from griffin.infra.http_client import HTTPXHTTPPort
+from griffin.services.esi_characters import ESICharactersService
+from rich.table import Table
+
 app = typer.Typer(add_completion=False, help="G.R.I.F.F.I.N. command-line interface")
 console = Console()
 
@@ -58,6 +63,32 @@ def ping() -> None:
     console.print("[bold green]Reply from ACEStack:[/bold green]")
     console.print(reply.to_dict())
 
+@app.command()
+def whois(character_id: int = typer.Argument(..., help="EVE character ID")) -> None:
+    """Look up basic public info for a character via ESI."""
+    cfg = get_config()
+    logging.getLogger(__name__).info(
+        "whois lookup for character_id=%s using ESI base %s", character_id, cfg.esi_base_url
+    )
+
+    with HTTPXHTTPPort() as http:
+        service = ESICharactersService(http=http)
+        char = service.get_public_character(character_id)
+
+    table = Table(title=f"Character {char.name} ({char.character_id})")
+    table.add_column("Field")
+    table.add_column("Value")
+
+    table.add_row("Name", char.name)
+    table.add_row("Character ID", str(char.character_id))
+    table.add_row("Corporation ID", str(char.corporation_id or "—"))
+    table.add_row("Alliance ID", str(char.alliance_id or "—"))
+    table.add_row("Security Status", f"{char.security_status:.2f}" if char.security_status is not None else "—")
+    table.add_row("Birthday", char.birthday.isoformat() if char.birthday else "—")
+    table.add_row("Race ID", str(char.race_id or "—"))
+
+    console.print(f"[bold cyan]G.R.I.F.F.I.N.[/bold cyan] v{__version__}")
+    console.print(table)
 def run() -> None:
     app()
 
