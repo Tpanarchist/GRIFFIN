@@ -1,0 +1,71 @@
+[project]
+name = "griffin"
+version = "0.0.0"
+description = "G.R.I.F.F.I.N. — Galactic Recon & Intel Framework for Fleet Insight & Navigation"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+  { name = "GRIFFIN Maintainers", email = "dev@griffin.local" }
+]
+license = { text = "MIT" }
+keywords = ["eve-online", "intel", "ace", "griffin", "cli", "analytics"]
+
+[project.urls]
+"Homepage" = "https://github.com/Tpanarchist/GRIFFIN"
+"Repository" = "https://github.com/Tpanarchist/GRIFFIN.git"
+
+[project.dependencies]
+pydantic = "*"
+python-dateutil = "*"
+httpx = "*"
+loguru = "*"
+rich = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+seaborn = "*"
+pygame = "*"
+flask = "*"
+
+[project.optional-dependencies]
+analytics = [
+  "pandas",
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "seaborn",
+  "hypernetx",
+]
+tui = [
+  "textual",
+  "asciimatics",
+  "rich",
+]
+ai = [
+  "simpleaichat",
+  "chromadb",
+]
+infra = [
+  "httpx",
+  "loguru",
+  "python-dateutil",
+]
+viz = [
+  "matplotlib",
+  "seaborn",
+  "pygame",
+]
+web = [
+  "flask",
+]
+dev = [
+  "black",
+  "pytest",
+  "mypy",
+  "ruff",
+  "pip-tools",
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"

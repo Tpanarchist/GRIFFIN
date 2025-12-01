@@ -1,10 +1,33 @@
-﻿black==25.11.0
-click==8.3.1
-colorama==0.4.6
-mypy_extensions==1.1.0
-packaging==25.0
-pathspec==0.12.1
-platformdirs==4.5.0
-pytokens==0.3.0
-setuptools==80.9.0
-wheel==0.45.1
+﻿# Flat requirements for G.R.I.F.F.I.N. — install everything listed in pyproject extras
+# Use venv before installing:
+#
+# ```bash
+# python -m venv .venv
+# .\.venv\Scripts\activate
+# python -m pip install --upgrade pip
+# python -m pip install -r requirements.txt
+# ```
+pydantic
+python-dateutil
+httpx
+loguru
+rich
+textual
+asciimatics
+simpleaichat
+chromadb
+hypernetx
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+pygame
+flask
+
+# Dev tools
+black
+pytest
+mypy
+ruff
+pip-tools
