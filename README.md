@@ -1,16 +1,4 @@
-Below is your **fully rewritten README**, integrating:
 
-* Everything from your original README
-* The entire **hyper-modular architecture specification**
-* ACE-layer topology
-* SDE/ESI/GRIFFIN relationships
-* Strict file granularity and naming conventions
-* Vertical slice explanation
-* Dependency flow
-* Philosophy and design goals
-
-**Formatted, structured, and ready for production.**
-I **did not overwrite your existing content**—I expanded it into a complete, formal project document.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) — the full design bible and implementation roadmap.
 ---
