@@ -92,3 +92,89 @@ class ACEStack:
 
         # Not inside running loop: safe to run the async send via asyncio.run
         return asyncio.run(self.send_async(msg))
+
+    # Integration helper: build a stack wired to the Aspirational layer (simpleaichat)
+    @classmethod
+    def from_config(cls) -> "ACEStack":
+        """Construct an ACEStack pre-configured with an Aspirational handler.
+
+        This implementation registers a handler that lazily initializes the
+        aspirational layer on first use. Lazy initialization avoids import-time
+        failures and makes runtime errors visible in logs while still providing
+        a deterministic DummyLLM fallback for local development.
+        """
+        stack = cls()
+
+        # Holder for lazily-constructed objects
+        state: Dict[str, object] = {"initialized": False, "aspirational": None}
+
+        def ensure_initialized() -> None:
+            """Attempt to initialize the aspirational layer once."""
+            if state["initialized"]:
+                return
+            state["initialized"] = True  # attempt only once
+            try:
+                from griffin.ace.aspirational import AspirationalLayer  # late import
+                from griffin.infra.llm_simpleaichat import SimpleAIChatLLM
+
+                llm = SimpleAIChatLLM()
+                # Ensure underlying AIChat initialized successfully before accepting.
+                if getattr(llm, "_ai", None) is not None:
+                    state["aspirational"] = AspirationalLayer(llm=llm)
+                    logger.info("Initialized AspirationalLayer with SimpleAIChatLLM.")
+                    return
+                logger.info("SimpleAIChatLLM created but underlying AIChat is not available; will try DummyLLM fallback.")
+            except Exception as exc:
+                logger.info("SimpleAIChatLLM unavailable or failed to initialize: %s", exc)
+
+            # Try dummy fallback
+            try:
+                from griffin.infra.llm_dummy import DummyLLM
+                from griffin.ace.aspirational import AspirationalLayer  # ensure prompt import
+
+                llm = DummyLLM()
+                state["aspirational"] = AspirationalLayer(llm=llm)
+                logger.info("Initialized AspirationalLayer with DummyLLM fallback.")
+                return
+            except Exception as exc2:
+                logger.exception("Failed to initialize DummyLLM fallback: %s", exc2)
+                state["aspirational"] = None
+
+        def aspirational_handler(msg: ACEMessage) -> ACEMessage:
+            """Handler which routes 'ace:' prefixed messages to AspirationalLayer (lazy init)."""
+            text = (msg.content or "").strip()
+            if not text.lower().startswith("ace:"):
+                return ACEMessage(
+                    source="ace-stack",
+                    role="agent",
+                    channel=msg.channel,
+                    content=f"echo: {msg.content}",
+                    meta={"in_reply_to": str(msg.id)},
+                )
+
+            # Ensure we have an aspirational implementation
+            ensure_initialized()
+            aspirational = state.get("aspirational")
+            if aspirational is None:
+                # final fallback: echo and log
+                logger.warning("Aspirational layer not available; falling back to echo.")
+                return ACEMessage(
+                    source="ace-stack",
+                    role="agent",
+                    channel=msg.channel,
+                    content=f"echo: {msg.content}",
+                    meta={"in_reply_to": str(msg.id)},
+                )
+
+            cleaned = text.split(":", 1)[1].strip()
+            inner = ACEMessage(
+                source=msg.source,
+                role=msg.role,
+                channel=msg.channel,
+                content=cleaned,
+                meta=dict(msg.meta),
+            )
+            return aspirational.evaluate(inner, telemetry={})
+
+        stack.register_handler("aspirational", aspirational_handler)
+        return stack

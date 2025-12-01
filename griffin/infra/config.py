@@ -21,6 +21,14 @@ class GriffinConfig(BaseModel):
         default_factory=lambda: os.getenv("GRIFFIN_DATA_DIR", "data"),
         description="Root directory for cached / derived data.",
     )
+    openai_api_key: Optional[str] = Field(
+        default=None,
+        description="OpenAI API key; if None, AIChat falls back to OPENAI_API_KEY env var.",
+    )
+    openai_model: str = Field(
+        default="gpt-4o-mini",
+        description="Default OpenAI chat model for ACE/LLM usage.",
+    )
 
 @lru_cache(maxsize=1)
 def get_config() -> GriffinConfig:
@@ -28,6 +36,8 @@ def get_config() -> GriffinConfig:
     return GriffinConfig(
         env=os.getenv("GRIFFIN_ENV", "dev"),  # type: ignore[arg-type]
         log_level=os.getenv("GRIFFIN_LOG_LEVEL", "INFO"),
+        openai_api_key=os.getenv("OPENAI_API_KEY", None),
+        openai_model=os.getenv("GRIFFIN_OPENAI_MODEL", "gpt-4o-mini"),
     )
 
 def setup_logging(level: Optional[str] = None) -> None:

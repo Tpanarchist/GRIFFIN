@@ -89,6 +89,17 @@ def whois(character_id: int = typer.Argument(..., help="EVE character ID")) -> N
 
     console.print(f"[bold cyan]G.R.I.F.F.I.N.[/bold cyan] v{__version__}")
     console.print(table)
+
+@app.command()
+def ace(query: str = typer.Argument(..., help="Send a query to the ACE stack")) -> None:
+    """Talk to the ACE stack. Use 'ace:' prefix to invoke the Aspirational layer."""
+    stack = ACEStack.from_config()
+    msg = ACEMessage(source="cli", role="user", content=query)
+    reply = stack.send(msg)
+
+    console.print(f"[bold cyan]ACE Reply[/bold cyan]:")
+    console.print(reply.content)
+
 def run() -> None:
     app()
 
